@@ -14,6 +14,9 @@ import com.tang.intellij.lua.ty.ITyClass;
 public interface LuaDocTagClass extends LuaDocPsiElement, PsiNameIdentifierOwner, LuaClass, LuaDocTag, StubBasedPsiElement<LuaDocTagClassStub> {
 
   @Nullable
+  LuaDocClassNameRefList getClassNameRefList();
+
+  @Nullable
   LuaDocCommentString getCommentString();
 
   @NotNull
@@ -37,9 +40,6 @@ public interface LuaDocTagClass extends LuaDocPsiElement, PsiNameIdentifierOwner
   int getTextOffset();
 
   boolean isDeprecated();
-
-  @Nullable
-  LuaDocClassNameRef getSuperClassNameRef();
 
   @Nullable
   PsiElement getModule();

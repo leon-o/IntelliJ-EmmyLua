@@ -22,6 +22,7 @@ import com.intellij.psi.search.GlobalSearchScope
 import com.intellij.psi.stubs.StubInputStream
 import com.intellij.psi.stubs.StubOutputStream
 import com.intellij.util.Processor
+import com.intellij.util.containers.Stack
 import com.intellij.util.io.StringRef
 import com.tang.intellij.lua.Constants
 import com.tang.intellij.lua.comment.psi.LuaDocTableDef
@@ -31,11 +32,13 @@ import com.tang.intellij.lua.psi.*
 import com.tang.intellij.lua.psi.search.LuaClassInheritorsSearch
 import com.tang.intellij.lua.psi.search.LuaShortNamesManager
 import com.tang.intellij.lua.search.SearchContext
+import com.tang.intellij.lua.stubs.readNames
+import com.tang.intellij.lua.stubs.writeNames
 
 interface ITyClass : ITy {
     val className: String
     val varName: String
-    var superClassName: String?
+    var superClassName: Array<String>?
     var aliasName: String?
     fun processAlias(processor: Processor<String>): Boolean
     fun lazyInit(searchContext: SearchContext)
@@ -74,7 +77,7 @@ fun ITyClass.isVisibleInScope(project: Project, contextTy: ITy, visibility: Visi
 
 abstract class TyClass(override val className: String,
                        override val varName: String = "",
-                       override var superClassName: String? = null
+                       override var superClassName: Array<String>? = null
 ) : Ty(TyKind.Class), ITyClass {
 
     final override var aliasName: String? = null
@@ -151,13 +154,12 @@ abstract class TyClass(override val className: String,
         }
     }
 
-    override fun getSuperClass(context: SearchContext): ITy? {
+    override fun getSuperClass(context: SearchContext): Array<ITy>? {
         lazyInit(context)
-        val clsName = superClassName
-        if (clsName != null && clsName != className) {
-            return Ty.getBuiltin(clsName) ?: LuaShortNamesManager.getInstance(context.project).findClass(clsName, context)?.type
-        }
-        return null
+        //val clsName = superClassName
+        return superClassName?.filter { it != className }?.mapNotNull {
+            getBuiltin(it) ?: LuaShortNamesManager.getInstance(context.project).findClass(it, context)?.type
+        }?.toTypedArray()
     }
 
     override fun subTypeOf(other: ITy, context: SearchContext, strict: Boolean): Boolean {
@@ -207,18 +209,27 @@ abstract class TyClass(override val className: String,
 
         fun processSuperClass(start: ITyClass, searchContext: SearchContext, processor: (ITyClass) -> Boolean): Boolean {
             val processedName = mutableSetOf<String>()
-            var cur: ITy? = start
-            while (cur != null) {
-                val cls = cur.getSuperClass(searchContext)
-                if (cls is ITyClass) {
-                    if (!processedName.add(cls.className)) {
-                        // todo: Infinite inheritance
-                        return false
+            val stack = Stack<ITy>()
+            stack.push(start)
+            while (!stack.empty()) {
+                val top = stack.pop()
+                val supers = top.getSuperClass(searchContext)
+                if (supers != null) {
+                    for (superCls in supers){
+                        if(superCls !is TyClass) continue
+
+                        superCls.getSuperClass(searchContext)?.let {
+                            superClazz -> superClazz.forEach { stack.push(it) }
+                        }
+
+                        if (!processedName.add(superCls.className)) {
+                            // todo: Infinite inheritance
+                            return false
+                        }
+                        if (!processor(superCls))
+                            return false
                     }
-                    if (!processor(cls))
-                        return false
                 }
-                cur = cls
             }
             return true
         }
@@ -228,9 +239,9 @@ abstract class TyClass(override val className: String,
 class TyPsiDocClass(tagClass: LuaDocTagClass) : TyClass(tagClass.name) {
 
     init {
-        val supperRef = tagClass.superClassNameRef
-        if (supperRef != null)
-            superClassName = supperRef.text
+        val supperRef = tagClass.classNameRefList?.classNameRefList?.map { it.text }?.toTypedArray()
+        //if (supperRef != null)
+            superClassName = supperRef?: arrayOf()//.text
         aliasName = tagClass.aliasName
     }
 
@@ -239,7 +250,7 @@ class TyPsiDocClass(tagClass: LuaDocTagClass) : TyClass(tagClass.name) {
 
 open class TySerializedClass(name: String,
                              varName: String = name,
-                             supper: String? = null,
+                             supper: Array<String>? = null,
                              alias: String? = null,
                              flags: Int = 0)
     : TyClass(name, varName, supper) {
@@ -261,7 +272,7 @@ class TyLazyClass(name: String) : TySerializedClass(name)
 
 fun createSerializedClass(name: String,
                           varName: String = name,
-                          supper: String? = null,
+                          supper: Array<String>? = arrayOf(),
                           alias: String? = null,
                           flags: Int = 0): TyClass {
     val list = name.split("|")
@@ -358,11 +369,11 @@ object TyClassSerializer : TySerializer<ITyClass>() {
     override fun deserializeTy(flags: Int, stream: StubInputStream): ITyClass {
         val className = stream.readName()
         val varName = stream.readName()
-        val superName = stream.readName()
+        val superName = stream.readNames()
         val aliasName = stream.readName()
         return createSerializedClass(StringRef.toString(className),
                 StringRef.toString(varName),
-                StringRef.toString(superName),
+                superName,
                 StringRef.toString(aliasName),
                 flags)
     }
@@ -370,7 +381,7 @@ object TyClassSerializer : TySerializer<ITyClass>() {
     override fun serializeTy(ty: ITyClass, stream: StubOutputStream) {
         stream.writeName(ty.className)
         stream.writeName(ty.varName)
-        stream.writeName(ty.superClassName)
+        stream.writeNames(ty.superClassName?: arrayOf())
         stream.writeName(ty.aliasName)
     }
 }

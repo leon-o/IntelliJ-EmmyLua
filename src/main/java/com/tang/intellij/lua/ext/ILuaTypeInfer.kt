@@ -31,8 +31,8 @@ interface ILuaTypeInfer {
             for (typeInfer in EP_NAME.extensions) {
                 ProgressManager.checkCanceled()
                 val iTy = typeInfer.inferType(target, context)
-                if (!Ty.isInvalid(iTy))
-                    return iTy
+                //if (iTy!=null /*!Ty.isInvalid(iTy)*/)
+                return iTy
             }
             return Ty.UNKNOWN
         }

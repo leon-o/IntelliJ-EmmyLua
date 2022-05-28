@@ -18,7 +18,7 @@ import com.intellij.psi.tree.IElementType;
 
 public class LuaDocTagClassImpl extends StubBasedPsiElementBase<LuaDocTagClassStub> implements LuaDocTagClass {
 
-  public LuaDocTagClassImpl(@NotNull LuaDocTagClassStub stub, @NotNull IStubElementType type) {
+  public LuaDocTagClassImpl(@NotNull LuaDocTagClassStub stub, @NotNull IStubElementType<?, ?> type) {
     super(stub, type);
   }
 
@@ -34,9 +34,16 @@ public class LuaDocTagClassImpl extends StubBasedPsiElementBase<LuaDocTagClassSt
     visitor.visitTagClass(this);
   }
 
+  @Override
   public void accept(@NotNull PsiElementVisitor visitor) {
     if (visitor instanceof LuaDocVisitor) accept((LuaDocVisitor)visitor);
     else super.accept(visitor);
+  }
+
+  @Override
+  @Nullable
+  public LuaDocClassNameRefList getClassNameRefList() {
+    return PsiTreeUtil.getChildOfType(this, LuaDocClassNameRefList.class);
   }
 
   @Override
@@ -95,12 +102,6 @@ public class LuaDocTagClassImpl extends StubBasedPsiElementBase<LuaDocTagClassSt
   @Override
   public boolean isDeprecated() {
     return LuaDocPsiImplUtilKt.isDeprecated(this);
-  }
-
-  @Override
-  @Nullable
-  public LuaDocClassNameRef getSuperClassNameRef() {
-    return PsiTreeUtil.getChildOfType(this, LuaDocClassNameRef.class);
   }
 
   @Override

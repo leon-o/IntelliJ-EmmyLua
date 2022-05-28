@@ -65,7 +65,7 @@ interface ITy : Comparable<ITy> {
 
     fun subTypeOf(other: ITy, context: SearchContext, strict: Boolean): Boolean
 
-    fun getSuperClass(context: SearchContext): ITy?
+    fun getSuperClass(context: SearchContext): Array<ITy>?
 
     fun visitSuper(searchContext: SearchContext, processor: Processor<ITyClass>)
 
@@ -156,7 +156,7 @@ abstract class Ty(override val kind: TyKind) : ITy {
         return this == other
     }
 
-    override fun getSuperClass(context: SearchContext): ITy? {
+    override fun getSuperClass(context: SearchContext): Array<ITy>? {
         return null
     }
 

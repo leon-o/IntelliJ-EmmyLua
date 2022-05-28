@@ -151,7 +151,13 @@ fun renderClassDef(sb: StringBuilder, tag: LuaDocTagClass, tyRenderer: ITyRender
     val superClassName = cls.superClassName
     if (superClassName != null) {
         sb.append(" : ")
-        sb.appendClassLink(superClassName)
+        for (i in superClassName.indices){
+            sb.appendClassLink(superClassName[i])
+            if(i!=superClassName.size-1){
+                sb.append(",")
+            }
+        }
+
     }
     sb.append("</pre>")
     renderCommentString(" - ", null, sb, tag.commentString)

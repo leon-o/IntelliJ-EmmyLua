@@ -22,6 +22,10 @@ public class LuaDocVisitor extends PsiElementVisitor {
     visitPsiElement(o);
   }
 
+  public void visitClassNameRefList(@NotNull LuaDocClassNameRefList o) {
+    visitPsiElement(o);
+  }
+
   public void visitCommentString(@NotNull LuaDocCommentString o) {
     visitPsiElement(o);
   }
@@ -147,7 +151,7 @@ public class LuaDocVisitor extends PsiElementVisitor {
     visitPsiElement(o);
   }
 
-  public void visitLuaClassField(@NotNull LuaClassField o) {
+  public void visitPsiNameIdentifierOwner(@NotNull PsiNameIdentifierOwner o) {
     visitElement(o);
   }
 
@@ -159,11 +163,11 @@ public class LuaDocVisitor extends PsiElementVisitor {
     visitPsiElement(o);
   }
 
-  public void visitLuaTypeAlias(@NotNull LuaTypeAlias o) {
+  public void visitLuaClassField(@NotNull LuaClassField o) {
     visitElement(o);
   }
 
-  public void visitPsiNameIdentifierOwner(@NotNull PsiNameIdentifierOwner o) {
+  public void visitLuaTypeAlias(@NotNull LuaTypeAlias o) {
     visitElement(o);
   }
 

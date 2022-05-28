@@ -116,7 +116,7 @@ private fun LuaParamNameDef.infer(context: SearchContext): ITy {
 }
 
 private fun LuaNameDef.infer(context: SearchContext): ITy {
-    var type: ITy = Ty.UNKNOWN
+    var type: ITy = Ty.NIL
     val parent = this.parent
     if (parent is LuaTableField) {
         val expr = PsiTreeUtil.findChildOfType(parent, LuaExpr::class.java)

@@ -139,7 +139,11 @@ fun LuaCallExpr.createSubstitutor(sig: IFunSignature, context: SearchContext): I
         }
         sig.tyParameters.forEach {
             val superCls = it.superClassName
-            if (Ty.isInvalid(map[it.name]) && superCls != null) map[it.name] = Ty.create(superCls)
+            if (Ty.isInvalid(map[it.name]) && superCls != null) {
+                superCls.forEach { className ->
+                    map[className] = Ty.create(className)
+                }
+            }
         }
         return object : TySubstitutor() {
             override fun substitute(clazz: ITyClass): ITy {
@@ -347,7 +351,7 @@ private fun LuaIndexExpr.infer(context: SearchContext): ITy {
 
         // xxx.yyy = zzz
         //from value
-        var result: ITy = Ty.UNKNOWN
+        var result: ITy = Ty.NIL
         val assignStat = indexExpr.assignStat
         if (assignStat != null) {
             result = context.withIndex(assignStat.getIndexFor(indexExpr)) {
@@ -373,7 +377,7 @@ private fun LuaIndexExpr.infer(context: SearchContext): ITy {
         result
     })
 
-    return retTy ?: Ty.UNKNOWN
+    return retTy ?: Ty.NIL
 }
 
 private fun guessFieldType(fieldName: String, type: ITyClass, context: SearchContext): ITy {
@@ -381,7 +385,7 @@ private fun guessFieldType(fieldName: String, type: ITyClass, context: SearchCon
     if (type.className == Constants.WORD_G)
         return TyClass.createGlobalType(fieldName)
 
-    var set:ITy = Ty.UNKNOWN
+    var set:ITy = Ty.NIL
 
     LuaShortNamesManager.getInstance(context.project).processAllMembers(type, fieldName, context, Processor {
         set = set.union(it.guessType(context))
