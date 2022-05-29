@@ -85,15 +85,20 @@ class LookupElementFactory {
                                      name: String,
                                      field: LuaClassField,
                                      type:ITy?,
-                                     bold: Boolean): LuaLookupElement {
+                                     bold: Boolean,
+                                     useDot:Boolean = false): LuaLookupElement {
             val element = LuaFieldLookupElement(name, field, type, bold)
             if (!LuaRefactoringUtil.isLuaIdentifier(name)) {
-                element.lookupString = "['$name']"
-                val baseHandler = element.handler
-                element.handler = InsertHandler<LookupElement> { insertionContext, lookupElement ->
-                    baseHandler.handleInsert(insertionContext, lookupElement)
-                    // remove '.'
-                    insertionContext.document.deleteString(insertionContext.startOffset - 1, insertionContext.startOffset)
+                if (useDot){
+                    element.lookupString = name
+                }else{
+                    element.lookupString = "['$name']"
+                    val baseHandler = element.handler
+                    element.handler = InsertHandler<LookupElement> { insertionContext, lookupElement ->
+                        baseHandler.handleInsert(insertionContext, lookupElement)
+                        // remove '.'
+                        insertionContext.document.deleteString(insertionContext.startOffset - 1, insertionContext.startOffset)
+                    }
                 }
             }
             element.setTailText("  [$clazzName]")

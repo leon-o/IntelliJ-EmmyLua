@@ -160,7 +160,8 @@ open class ClassMemberCompletionProvider : LuaCompletionProvider() {
         val name = field.name
         if (name != null) {
             this.session?.addWord(name)
-            val element = LookupElementFactory.createFieldLookupElement(clazzName, name, field, ty, bold)
+            val lookupString = handlerProcessor?.processLookupString(name, field, ty) ?: name
+            val element = LookupElementFactory.createFieldLookupElement(clazzName, lookupString, field, ty, bold,true)
             val ele = handlerProcessor?.process(element, field, null) ?: element
             completionResultSet.addElement(ele)
         }

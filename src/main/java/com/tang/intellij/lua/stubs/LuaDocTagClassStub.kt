@@ -72,8 +72,8 @@ class LuaDocTagClassType : LuaStubElementType<LuaDocTagClassStub, LuaDocTagClass
         indexSink.occurrence(StubKeys.SHORT_NAME, classType.className)
 
         val superClassName = classType.superClassName
-        if (superClassName != null) {
-            //indexSink.occurrence(StubKeys.SUPER_CLASS_LIST, superClassName)
+        if (superClassName != null && superClassName.isNotEmpty()) {
+            indexSink.occurrence(StubKeys.SUPER_CLASS, superClassName.first())
             //todo put super class data into stub index
         }
     }

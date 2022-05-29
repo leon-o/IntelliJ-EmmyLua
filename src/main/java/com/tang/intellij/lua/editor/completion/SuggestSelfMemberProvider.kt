@@ -48,7 +48,7 @@ class SuggestSelfMemberProvider : ClassMemberCompletionProvider() {
                                 member,
                                 curType,
                                 type,
-                                MemberCompletionMode.Colon,
+                                MemberCompletionMode.All,
                                 project,
                                 object : HandlerProcessor() {
                                     override fun process(element: LuaLookupElement, member: LuaClassMember, memberTy: ITy?): LookupElement { return element }

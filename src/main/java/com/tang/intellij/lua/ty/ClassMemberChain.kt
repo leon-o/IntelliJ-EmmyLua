@@ -18,13 +18,15 @@ package com.tang.intellij.lua.ty
 
 import com.tang.intellij.lua.psi.LuaClassMember
 
-class ClassMemberChain(val ty: ITyClass, var superChain: ClassMemberChain?) {
+class ClassMemberChain(val ty: ITyClass, var superChains: Array<ClassMemberChain>) {
+    constructor(ty: ITyClass, superChain: ClassMemberChain?):this(ty,superChain?.run{ arrayOf(this) }?: arrayOf())
+
     private val members = mutableMapOf<String, LuaClassMember>()
 
     fun add(member: LuaClassMember) {
         val name = member.name ?: return
-        val superExist = superChain?.findMember(name)
-        val override = superExist == null || canOverride(member, superExist)
+        val superExist = superChains.mapNotNull { it.findMember(name) } //所有基类的同名成员
+        val override = superExist.isEmpty() || superExist.all { canOverride(member, it) } //没有或者都可以重写
         if (override) {
             val selfExist = members[name]
             if (selfExist == null || member.worth > selfExist.worth)
@@ -33,7 +35,15 @@ class ClassMemberChain(val ty: ITyClass, var superChain: ClassMemberChain?) {
     }
 
     fun findMember(name: String): LuaClassMember? {
-        return members.getOrElse(name) { superChain?.findMember(name) }
+        return members.getOrElse(name) {
+            var member:LuaClassMember? = null
+            for (superChain in superChains) {
+                member = superChain.findMember(name)
+                if(member!=null)
+                    break
+            }
+            member
+        }
     }
 
     private fun process(deep: Boolean, processor: (ITyClass, String, LuaClassMember) -> Unit) {
@@ -41,7 +51,7 @@ class ClassMemberChain(val ty: ITyClass, var superChain: ClassMemberChain?) {
             processor(ty, t, u)
         }
         if (deep)
-            superChain?.process(deep, processor)
+            superChains.forEach { it.process(true, processor) }
     }
 
     fun process(deep: Boolean, processor: (ITyClass, LuaClassMember) -> Unit) {
