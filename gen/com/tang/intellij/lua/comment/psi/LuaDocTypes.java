@@ -19,6 +19,7 @@ public interface LuaDocTypes {
   IElementType GENERAL_TY = LuaParserDefinitionKt.createDocType("GENERAL_TY");
   IElementType GENERIC_DEF = LuaParserDefinitionKt.createDocType("GENERIC_DEF");
   IElementType GENERIC_TY = LuaParserDefinitionKt.createDocType("GENERIC_TY");
+  IElementType NILABLE_TY = LuaParserDefinitionKt.createDocType("NILABLE_TY");
   IElementType PARAM_NAME_REF = LuaParserDefinitionKt.createDocType("PARAM_NAME_REF");
   IElementType PAR_TY = LuaParserDefinitionKt.createDocType("PAR_TY");
   IElementType STRING_LITERAL_TY = LuaParserDefinitionKt.createDocType("STRING_LITERAL_TY");
@@ -31,6 +32,7 @@ public interface LuaDocTypes {
   IElementType TAG_FIELD = LuaParserDefinitionKt.createDocType("TAG_FIELD");
   IElementType TAG_GENERIC_LIST = LuaParserDefinitionKt.createDocType("TAG_GENERIC_LIST");
   IElementType TAG_LAN = LuaParserDefinitionKt.createDocType("TAG_LAN");
+  IElementType TAG_NILABLE = LuaParserDefinitionKt.createDocType("TAG_NILABLE");
   IElementType TAG_OVERLOAD = LuaParserDefinitionKt.createDocType("TAG_OVERLOAD");
   IElementType TAG_PARAM = LuaParserDefinitionKt.createDocType("TAG_PARAM");
   IElementType TAG_RETURN = LuaParserDefinitionKt.createDocType("TAG_RETURN");
@@ -48,6 +50,7 @@ public interface LuaDocTypes {
   IElementType COMMA = new LuaDocTokenType(",");
   IElementType DASHES = new LuaDocTokenType("DASHES");
   IElementType EQ = new LuaDocTokenType("=");
+  IElementType EXCL = new LuaDocTokenType("!");
   IElementType EXTENDS = new LuaDocTokenType(":");
   IElementType FUN = new LuaDocTokenType("fun");
   IElementType GT = new LuaDocTokenType(">");
@@ -55,10 +58,12 @@ public interface LuaDocTypes {
   IElementType LCURLY = new LuaDocTokenType("{");
   IElementType LPAREN = new LuaDocTokenType("(");
   IElementType LT = new LuaDocTokenType("<");
+  IElementType NILABLE = new LuaDocTokenType("NILABLE");
   IElementType OR = new LuaDocTokenType("|");
   IElementType PRIVATE = new LuaDocTokenType("PRIVATE");
   IElementType PROTECTED = new LuaDocTokenType("PROTECTED");
   IElementType PUBLIC = new LuaDocTokenType("PUBLIC");
+  IElementType QUES = new LuaDocTokenType("?");
   IElementType RCURLY = new LuaDocTokenType("}");
   IElementType RPAREN = new LuaDocTokenType(")");
   IElementType SHARP = new LuaDocTokenType("#");
@@ -73,6 +78,7 @@ public interface LuaDocTypes {
   IElementType TAG_NAME_LANGUAGE = new LuaDocTokenType("language");
   IElementType TAG_NAME_MODULE = new LuaDocTokenType("module");
   IElementType TAG_NAME_NAME = new LuaDocTokenType("TAG_NAME_NAME");
+  IElementType TAG_NAME_NILABLE = new LuaDocTokenType("TAG_NAME_NILABLE");
   IElementType TAG_NAME_OVERLOAD = new LuaDocTokenType("overload");
   IElementType TAG_NAME_PARAM = new LuaDocTokenType("param");
   IElementType TAG_NAME_PRIVATE = new LuaDocTokenType("private");
@@ -118,6 +124,9 @@ public interface LuaDocTypes {
       else if (type == GENERIC_TY) {
         return new LuaDocGenericTyImpl(node);
       }
+      else if (type == NILABLE_TY) {
+        return new LuaDocNilableTyImpl(node);
+      }
       else if (type == PARAM_NAME_REF) {
         return new LuaDocParamNameRefImpl(node);
       }
@@ -153,6 +162,9 @@ public interface LuaDocTypes {
       }
       else if (type == TAG_LAN) {
         return new LuaDocTagLanImpl(node);
+      }
+      else if (type == TAG_NILABLE) {
+        return new LuaDocTagNilableImpl(node);
       }
       else if (type == TAG_OVERLOAD) {
         return new LuaDocTagOverloadImpl(node);

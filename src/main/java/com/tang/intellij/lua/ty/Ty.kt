@@ -36,7 +36,8 @@ enum class TyKind {
     Void,
     Tuple,
     GenericParam,
-    StringLiteral
+    StringLiteral,
+    Nilable,
 }
 enum class TyPrimitiveKind {
     String,

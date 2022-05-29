@@ -22,7 +22,9 @@ import com.intellij.psi.PsiFile
 import com.intellij.psi.StubBuilder
 import com.intellij.psi.stubs.*
 import com.intellij.psi.tree.IStubFileElementType
+import com.intellij.psi.util.findTopmostParentOfType
 import com.intellij.util.io.StringRef
+import com.tang.intellij.lua.comment.psi.LuaDocTagNilable
 import com.tang.intellij.lua.lang.LuaLanguage
 import com.tang.intellij.lua.lang.LuaParserDefinition
 import com.tang.intellij.lua.psi.LuaPsiFile
@@ -61,6 +63,7 @@ class LuaFileElementType : IStubFileElementType<LuaFileStub>(LuaLanguage.INSTANC
             override fun createStubForFile(file: PsiFile): StubElement<*> {
                 if (file is LuaPsiFile){
                     isTooLarger = file.tooLarger
+                    val nillable = file.findTopmostParentOfType<LuaDocTagNilable>()
                     return LuaFileStub(file)
                 }
                 return super.createStubForFile(file)

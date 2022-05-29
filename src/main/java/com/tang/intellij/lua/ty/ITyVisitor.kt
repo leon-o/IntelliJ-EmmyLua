@@ -30,6 +30,8 @@ interface ITyVisitor {
     fun visitArray(array: ITyArray)
 
     fun visitGeneric(generic: ITyGeneric)
+
+    fun visitNilable(nilable: TyNilable)
 }
 
 open class TyVisitor : ITyVisitor {
@@ -59,5 +61,9 @@ open class TyVisitor : ITyVisitor {
 
     override fun visitGeneric(generic: ITyGeneric) {
         visitTy(generic)
+    }
+
+    override fun visitNilable(nilable: TyNilable) {
+        visitTy(nilable)
     }
 }

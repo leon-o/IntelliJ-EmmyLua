@@ -22,6 +22,7 @@ import com.intellij.psi.PsiElement
 import com.intellij.psi.PsiFile
 import com.intellij.psi.util.PsiTreeUtil
 import com.tang.intellij.lua.Constants
+import com.tang.intellij.lua.comment.psi.LuaDocNilableTy
 import com.tang.intellij.lua.comment.psi.LuaDocParamNameRef
 import com.tang.intellij.lua.highlighting.LuaHighlightingData
 import com.tang.intellij.lua.psi.*

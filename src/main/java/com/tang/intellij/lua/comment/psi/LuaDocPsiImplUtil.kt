@@ -256,6 +256,10 @@ fun getType(luaDocFunctionTy: LuaDocFunctionTy): ITy {
     return TyDocPsiFunction(luaDocFunctionTy)
 }
 
+fun getType(luaDocNilableTy: LuaDocNilableTy): ITy{
+    return TyNilable(luaDocNilableTy.ty.getType())
+}
+
 fun getReturnType(luaDocFunctionTy: LuaDocFunctionTy): ITy {
     val list = luaDocFunctionTy.typeList?.tyList?.map { it.getType() }
 

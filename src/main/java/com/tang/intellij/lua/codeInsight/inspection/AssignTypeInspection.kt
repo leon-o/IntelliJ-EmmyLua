@@ -19,7 +19,11 @@ package com.tang.intellij.lua.codeInsight.inspection
 import com.intellij.codeInspection.LocalInspectionToolSession
 import com.intellij.codeInspection.ProblemsHolder
 import com.intellij.psi.PsiElementVisitor
+import com.intellij.psi.util.findParentInFile
+import com.intellij.psi.util.findParentOfType
+import com.tang.intellij.lua.comment.psi.LuaDocTagNilable
 import com.tang.intellij.lua.psi.LuaAssignStat
+import com.tang.intellij.lua.psi.LuaDeclarationTree
 import com.tang.intellij.lua.psi.LuaIndexExpr
 import com.tang.intellij.lua.psi.LuaVisitor
 import com.tang.intellij.lua.search.SearchContext
@@ -31,7 +35,6 @@ class AssignTypeInspection : StrictInspection() {
             object : LuaVisitor() {
                 override fun visitAssignStat(o: LuaAssignStat) {
                     super.visitAssignStat(o)
-
                     val assignees = o.varExprList.exprList
                     val values = o.valueExprList?.exprList ?: listOf()
                     val searchContext = SearchContext.get(o.project)

@@ -101,6 +101,7 @@ SINGLE_QUOTED_STRING='([^\\\']|\\\S|\\[\r\n])*'?    //'([^\\'\r\n]|\\[^\r\n])*'?
     "see"                      { yybegin(xTAG); return TAG_NAME_SEE; }
     "alias"                    { yybegin(xALIAS); return TAG_NAME_ALIAS; }
     "suppress"                 { yybegin(xSUPPRESS); return TAG_NAME_SUPPRESS; }
+    "nilable"                 { return TAG_NAME_NILABLE; }
     {ID}                       { yybegin(xCOMMENT_STRING); return TAG_NAME; }
     [^]                        { return com.intellij.psi.TokenType.BAD_CHARACTER; }
 }
@@ -160,6 +161,7 @@ SINGLE_QUOTED_STRING='([^\\\']|\\\S|\\[\r\n])*'?    //'([^\\'\r\n]|\\[^\r\n])*'?
     "\""                       { yybegin(xDOUBLE_QUOTED_STRING); yypushback(yylength()); }
     "'"                        { yybegin(xSINGLE_QUOTED_STRING); yypushback(yylength()); }
     "[]"                       { _typeReq = false; return ARR; }
+    "?"                        { _typeReq = false; return NILABLE; }
     "fun"                      { return FUN; }
     "vararg"                   { _typeReq = true; return VARARG; }
     "..."|{ID}                 { if (_typeReq || _typeLevel > 0) { _typeReq = false; return ID; } else { yybegin(xCOMMENT_STRING); yypushback(yylength()); } }

@@ -83,6 +83,11 @@ open class TyRenderer : TyVisitor(), ITyRenderer {
                 if (list.size <= 1) sb.append(list.joinToString(", "))
                 else sb.append("(${list.joinToString(", ")})")
             }
+
+            override fun visitNilable(nilable: TyNilable) {
+                visitTy(nilable.realType)
+                sb.append("?")
+            }
         })
     }
 

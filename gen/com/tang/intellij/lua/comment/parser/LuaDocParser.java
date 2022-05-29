@@ -37,8 +37,8 @@ public class LuaDocParser implements PsiParser, LightPsiParser {
 
   public static final TokenSet[] EXTENDS_SETS_ = new TokenSet[] {
     create_token_set_(ARR_TY, FUNCTION_TY, GENERAL_TY, GENERIC_TY,
-      PAR_TY, STRING_LITERAL_TY, TABLE_TY, TY,
-      UNION_TY),
+      NILABLE_TY, PAR_TY, STRING_LITERAL_TY, TABLE_TY,
+      TY, UNION_TY),
   };
 
   /* ********************************************************** */
@@ -205,7 +205,8 @@ public class LuaDocParser implements PsiParser, LightPsiParser {
   //     | tag_see
   //     | tag_def
   //     | access_modifier
-  //     | tag_generic_list)
+  //     | tag_generic_list
+  //     | tag_nilable)
   static boolean doc_item(PsiBuilder b, int l) {
     if (!recursion_guard_(b, l, "doc_item")) return false;
     if (!nextTokenIs(b, AT)) return false;
@@ -231,6 +232,7 @@ public class LuaDocParser implements PsiParser, LightPsiParser {
   //     | tag_def
   //     | access_modifier
   //     | tag_generic_list
+  //     | tag_nilable
   private static boolean doc_item_1(PsiBuilder b, int l) {
     if (!recursion_guard_(b, l, "doc_item_1")) return false;
     boolean r;
@@ -248,6 +250,7 @@ public class LuaDocParser implements PsiParser, LightPsiParser {
     if (!r) r = tag_def(b, l + 1);
     if (!r) r = access_modifier(b, l + 1);
     if (!r) r = tag_generic_list(b, l + 1);
+    if (!r) r = tag_nilable(b, l + 1);
     return r;
   }
 
@@ -748,6 +751,18 @@ public class LuaDocParser implements PsiParser, LightPsiParser {
   }
 
   /* ********************************************************** */
+  // TAG_NAME_NILABLE
+  public static boolean tag_nilable(PsiBuilder b, int l) {
+    if (!recursion_guard_(b, l, "tag_nilable")) return false;
+    if (!nextTokenIs(b, TAG_NAME_NILABLE)) return false;
+    boolean r;
+    Marker m = enter_section_(b);
+    r = consumeToken(b, TAG_NAME_NILABLE);
+    exit_section_(b, m, TAG_NILABLE, r);
+    return r;
+  }
+
+  /* ********************************************************** */
   // TAG_NAME_OVERLOAD function_ty
   public static boolean tag_overload(PsiBuilder b, int l) {
     if (!recursion_guard_(b, l, "tag_overload")) return false;
@@ -968,14 +983,15 @@ public class LuaDocParser implements PsiParser, LightPsiParser {
   /* ********************************************************** */
   // Expression root: ty
   // Operator priority table:
-  // 0: N_ARY(union_ty)
-  // 1: ATOM(function_ty)
-  // 2: ATOM(table_ty)
-  // 3: POSTFIX(generic_ty)
-  // 4: POSTFIX(arr_ty)
-  // 5: ATOM(general_ty)
-  // 6: ATOM(par_ty)
-  // 7: ATOM(string_literal_ty)
+  // 0: POSTFIX(nilable_ty)
+  // 1: N_ARY(union_ty)
+  // 2: ATOM(function_ty)
+  // 3: ATOM(table_ty)
+  // 4: POSTFIX(generic_ty)
+  // 5: POSTFIX(arr_ty)
+  // 6: ATOM(general_ty)
+  // 7: ATOM(par_ty)
+  // 8: ATOM(string_literal_ty)
   public static boolean ty(PsiBuilder b, int l, int g) {
     if (!recursion_guard_(b, l, "ty")) return false;
     addVariant(b, "<ty>");
@@ -997,18 +1013,22 @@ public class LuaDocParser implements PsiParser, LightPsiParser {
     boolean r = true;
     while (true) {
       Marker m = enter_section_(b, l, _LEFT_, null);
-      if (g < 0 && consumeTokenSmart(b, OR)) {
+      if (g < 0 && consumeTokenSmart(b, NILABLE)) {
+        r = true;
+        exit_section_(b, l, m, NILABLE_TY, r, true, null);
+      }
+      else if (g < 1 && consumeTokenSmart(b, OR)) {
         while (true) {
-          r = report_error_(b, ty(b, l, 0));
+          r = report_error_(b, ty(b, l, 1));
           if (!consumeTokenSmart(b, OR)) break;
         }
         exit_section_(b, l, m, UNION_TY, r, true, null);
       }
-      else if (g < 3 && leftMarkerIs(b, GENERAL_TY) && generic_ty_0(b, l + 1)) {
+      else if (g < 4 && leftMarkerIs(b, GENERAL_TY) && generic_ty_0(b, l + 1)) {
         r = true;
         exit_section_(b, l, m, GENERIC_TY, r, true, null);
       }
-      else if (g < 4 && consumeTokenSmart(b, ARR)) {
+      else if (g < 5 && consumeTokenSmart(b, ARR)) {
         r = true;
         exit_section_(b, l, m, ARR_TY, r, true, null);
       }

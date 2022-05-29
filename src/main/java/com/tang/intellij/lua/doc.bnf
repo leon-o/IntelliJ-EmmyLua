@@ -40,6 +40,8 @@
         EQ = '='
         COMMA = ','
         EXTENDS = ':'
+        EXCL = '!'
+        QUES = '?'
         OR = '|'
         GT = ">"
         LT = "<"
@@ -97,9 +99,10 @@ private doc_item ::= '@' (tag_param
     | tag_see
     | tag_def
     | access_modifier
-    | tag_generic_list)
+    | tag_generic_list
+    | tag_nilable)
 
-ty ::= union_ty | function_ty | table_ty | generic_ty | arr_ty | general_ty | par_ty | string_literal_ty {
+ty ::= nilable_ty | union_ty | function_ty | table_ty | generic_ty | arr_ty | general_ty | par_ty | string_literal_ty {
     implements = ['com.tang.intellij.lua.comment.psi.LuaDocType']
 }
 
@@ -174,6 +177,11 @@ function_ty ::= fun function_generic? '(' function_param_list ')' (':' type_list
 union_ty ::= ty ('|' ty)+ {
     methods = [getType]
 }
+
+nilable_ty ::= ty NILABLE{
+    methods = [getType]
+}
+
 access_modifier ::= PRIVATE | PUBLIC | PROTECTED | TAG_NAME_PRIVATE | TAG_NAME_PUBLIC | TAG_NAME_PROTECTED
 
 tag_field ::= TAG_NAME_FIELD access_modifier? ('<' class_name_ref '>')? ID ty comment_string? {
@@ -323,3 +331,5 @@ tag_alias ::= TAG_NAME_ALIAS ID ty {
 tag_suppress ::= TAG_NAME_SUPPRESS ID (',' ID)* {
     pin = 1
 }
+
+tag_nilable ::= TAG_NAME_NILABLE

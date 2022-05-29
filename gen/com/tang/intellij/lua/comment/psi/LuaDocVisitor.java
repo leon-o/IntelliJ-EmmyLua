@@ -50,6 +50,10 @@ public class LuaDocVisitor extends PsiElementVisitor {
     visitTy(o);
   }
 
+  public void visitNilableTy(@NotNull LuaDocNilableTy o) {
+    visitTy(o);
+  }
+
   public void visitParTy(@NotNull LuaDocParTy o) {
     visitTy(o);
   }
@@ -104,6 +108,10 @@ public class LuaDocVisitor extends PsiElementVisitor {
   }
 
   public void visitTagLan(@NotNull LuaDocTagLan o) {
+    visitTag(o);
+  }
+
+  public void visitTagNilable(@NotNull LuaDocTagNilable o) {
     visitTag(o);
   }
 
