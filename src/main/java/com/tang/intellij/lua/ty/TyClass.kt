@@ -34,6 +34,7 @@ import com.tang.intellij.lua.psi.search.LuaShortNamesManager
 import com.tang.intellij.lua.search.SearchContext
 import com.tang.intellij.lua.stubs.readNames
 import com.tang.intellij.lua.stubs.writeNames
+import java.lang.reflect.Member
 
 interface ITyClass : ITy {
     val className: String
@@ -84,6 +85,7 @@ abstract class TyClass(override val className: String,
 
     private var _lazyInitialized: Boolean = false
 
+    private val _memberChainCache:MutableMap<Project,ClassMemberChain> = HashMap()
     override fun equals(other: Any?): Boolean {
         return other is ITyClass && other.className == className && other.flags == flags
     }
@@ -104,6 +106,7 @@ abstract class TyClass(override val className: String,
     }
 
     override fun getMemberChain(context: SearchContext): ClassMemberChain {
+
         val superClazzChains = getSuperClass(context)?.filterIsInstance<ITyClass>()
             ?.map { ClassMemberChain(it,it.getMemberChain(context)) }?.toTypedArray()?: arrayOf()
         val chain = ClassMemberChain(this, superClazzChains)
@@ -333,8 +336,12 @@ class TyTable(val table: LuaTableExpr) : TyClass(getTableTypeName(table)) {
 
     override fun subTypeOf(other: ITy, context: SearchContext, strict: Boolean): Boolean {
         // Empty list is a table, but subtype of all lists
-        return super.subTypeOf(other, context, strict) || other == Ty.TABLE || (other is TyArray && table.tableFieldList.size == 0)
+        return super.subTypeOf(other, context, strict)
+                || other is ITyClass && this.isAllMemberFitTo(other,context,strict)
+                || (other is TyArray && table.tableFieldList.size == 0)
     }
+
+
 }
 
 fun getDocTableTypeName(table: LuaDocTableDef): String {

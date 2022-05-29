@@ -62,6 +62,24 @@ class ClassMemberChain(val ty: ITyClass, var superChains: Array<ClassMemberChain
         }
     }
 
+    /**
+     *  Apply processor to all members. If all processor return true, this function return true otherwise false
+     *  @param deep whether to include members of all base classes
+     *  @param processor the function apply to process the members. Returning false will stop the iteration.
+     */
+    fun all(deep: Boolean, processor: (ITyClass,String, LuaClassMember) -> Boolean):Boolean{
+        var result = false
+        for ((t, u) in members) {
+            result = processor(ty, t, u)
+            if(!result)
+                break
+        }
+        if (deep && result)
+            superChains.forEach { result = result && it.all(true, processor) }
+
+        return result
+    }
+
     private fun canOverride(member: LuaClassMember, superMember: LuaClassMember): Boolean {
         return member.worth > superMember.worth || (member.worth == superMember.worth && member.worth > LuaClassMember.WORTH_ASSIGN)
     }

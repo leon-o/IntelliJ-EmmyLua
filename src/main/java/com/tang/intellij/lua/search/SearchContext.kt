@@ -183,4 +183,6 @@ class SearchContext private constructor(val project: Project) {
     fun invalidateInferCache() {
         myInferCache.clear()
     }
+
+
 }

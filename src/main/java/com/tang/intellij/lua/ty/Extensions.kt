@@ -36,3 +36,27 @@ fun ITy.hasMember(name: String, context: SearchContext): Boolean {
     }
     return false
 }
+
+fun ITyClass.isAllMemberFitTo(target:ITyClass, context:SearchContext, deep:Boolean = false):Boolean{
+    val myMemberChain = this.getMemberChain(context)
+    val targetMemberChain = target.getMemberChain(context)
+    return targetMemberChain.all(true){
+        _,name,member->
+        val targetType = member.guessType(context)
+        if(targetType==Ty.UNKNOWN)
+            return@all true
+
+        val myMember = myMemberChain.findMember(name)
+        if(myMember!=null){
+            val myType = myMember.guessType(context)
+            if(deep && targetType is TyClass && myType is TyClass){
+                return@all myType.isAllMemberFitTo(targetType,context,true)
+            }else{
+                return@all targetType==myType
+            }
+        }
+        else{ // Can't find that member, this is an unfit type.
+            return@all false
+        }
+    }
+}
