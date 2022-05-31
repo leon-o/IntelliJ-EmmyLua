@@ -19,10 +19,7 @@ package com.tang.intellij.lua.codeInsight.inspection
 import com.intellij.codeInspection.ProblemsHolder
 import com.intellij.psi.PsiElementVisitor
 import com.intellij.psi.util.PsiTreeUtil
-import com.tang.intellij.lua.psi.LuaAssignStat
-import com.tang.intellij.lua.psi.LuaIndexExpr
-import com.tang.intellij.lua.psi.LuaVisitor
-import com.tang.intellij.lua.psi.prefixExpr
+import com.tang.intellij.lua.psi.*
 import com.tang.intellij.lua.search.SearchContext
 import com.tang.intellij.lua.ty.*
 
@@ -32,25 +29,45 @@ class UndeclaredMemberInspection : StrictInspection() {
             override fun visitIndexExpr(o: LuaIndexExpr) {
                 super.visitIndexExpr(o)
                 val context = SearchContext.get(o.project)
+
+                val memberName: String? = if (o.dot != null) {
+                    o.name
+                } else if (o.exprList.size >= 2) {
+                    val indexExpr = o.exprList[1]
+                    if (indexExpr is LuaLiteralExpr && indexExpr.kind == LuaLiteralKind.String) {
+                        indexExpr.stringValue
+                    } else {
+                        null
+                    }
+                } else {
+                    null
+                }
+
+                if(memberName==null){
+                    return
+                }
+
                 when (val prefixType = o.prefixExpr.guessType(context)) {
                     is ITyClass, is TyUnion -> {
                         val assignStat = o.parent.parent
                         if (assignStat is LuaAssignStat) //赋值语句不报错
                             return
-                        o.name?.let {
-                            if (!prefixType.hasMember(it, context)) {
-                                holder.registerProblem(o, "No such member '%s' found on type '%s'".format(o.name, prefixType))
-                            }
+
+                        if (!prefixType.hasMember(memberName, context)) {
+                            holder.registerProblem(
+                                o,
+                                "No such member '%s' found on type '%s'".format(memberName, prefixType)
+                            )
                         }
                     }
                     is TyUnknown -> {
-                        holder.registerProblem(o, "No such member '%s' found on type '%s'".format(o.name, prefixType))
+                        holder.registerProblem(o, "No such member '%s' found on type '%s'".format(memberName, prefixType))
                     }
                     is TyNil -> {
                         holder.registerProblem(o, "'%s' is nil".format(o.prefixExpr.text))
                     }
                     else -> {
-                        holder.registerProblem(o, "No such member '%s' found on type '%s'".format(o.name, prefixType))
+                        holder.registerProblem(o, "No such member '%s' found on type '%s'".format(memberName, prefixType))
                     }
                 }
             }
