@@ -60,14 +60,14 @@ class LuaClassMemberIndex : IntStubIndexExtension<LuaClassMember>() {
                     // from alias
                     type.lazyInit(context)
                     val notFound = type.processAlias(Processor {
-                        process(it, fieldName, context, processor, false)
+                        process(it, fieldName, context, processor, true) // Modified by leon-o 2022/6/1, original: false
                     })
                     if (!notFound)
                         return false
 
                     // from supper
                     return TyClass.processSuperClass(type, context) {
-                        process(it.className, fieldName, context, processor, false)
+                        process(it.className, fieldName, context, processor, true) // Modified by leon-o 2022/6/1, original: false
                     }
                 }
             }

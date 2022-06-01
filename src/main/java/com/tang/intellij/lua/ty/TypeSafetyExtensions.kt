@@ -62,22 +62,22 @@ fun ITyClass.isAllMemberFitTo(target: ITyClass, context: SearchContext, deep: Bo
 }
 
 fun ITy.isIndexableBy(type: ITy,context: SearchContext,strict: Boolean): Boolean {
-    if (type is TyPrimitive && type.primitiveKind == TyPrimitiveKind.String) {
+    if (type is ITyPrimitive && type.primitiveKind == TyPrimitiveKind.String) {
         if(this is ITyClass)
             return true
     }
-    if (type is TyPrimitive && type.primitiveKind == TyPrimitiveKind.Number) {
+    if (type is ITyPrimitive && type.primitiveKind == TyPrimitiveKind.Number) {
         if (this is TyArray
             || this is TyGeneric
-                && this.base is TyPrimitive
-                && (this.base as TyPrimitive).primitiveKind == TyPrimitiveKind.Table
-                && this.params[0] is TyPrimitive
-                && (this.params[0] as TyPrimitive).primitiveKind == TyPrimitiveKind.Number)
+                && this.base is ITyPrimitive
+                && (this.base as ITyPrimitive).primitiveKind == TyPrimitiveKind.Table
+                && this.params[0] is ITyPrimitive
+                && (this.params[0] as ITyPrimitive).primitiveKind == TyPrimitiveKind.Number)
             return true
     }else{
         if(this is TyGeneric
-            && this.base is TyPrimitive
-            && (this.base as TyPrimitive).primitiveKind == TyPrimitiveKind.Table
+            && this.base is ITyPrimitive
+            && (this.base as ITyPrimitive).primitiveKind == TyPrimitiveKind.Table
             && this.params.size>1
             && type.subTypeOf(this.params[0],context,strict))
             return true
