@@ -17,6 +17,8 @@
 package com.tang.intellij.lua.ty
 
 import com.tang.intellij.lua.ext.recursionGuard
+import com.tang.intellij.lua.psi.LuaLiteralKind
+import com.tang.intellij.lua.psi.kind
 import com.tang.intellij.lua.search.SearchContext
 
 fun ITy.hasMember(name: String, context: SearchContext): Boolean {
@@ -37,26 +39,49 @@ fun ITy.hasMember(name: String, context: SearchContext): Boolean {
     return false
 }
 
-fun ITyClass.isAllMemberFitTo(target:ITyClass, context:SearchContext, deep:Boolean = false):Boolean{
+fun ITyClass.isAllMemberFitTo(target: ITyClass, context: SearchContext, deep: Boolean = false): Boolean {
     val myMemberChain = this.getMemberChain(context)
     val targetMemberChain = target.getMemberChain(context)
-    return targetMemberChain.all(true){
-        _,name,member->
+    return targetMemberChain.all(true) { _, name, member ->
         val targetType = member.guessType(context)
-        if(targetType==Ty.UNKNOWN)
+        if (targetType == Ty.UNKNOWN)
             return@all true
 
         val myMember = myMemberChain.findMember(name)
-        if(myMember!=null){
+        if (myMember != null) {
             val myType = myMember.guessType(context)
-            if(deep && targetType is TyClass && myType is TyClass){
-                return@all myType.isAllMemberFitTo(targetType,context,true)
-            }else{
-                return@all targetType==myType
+            if (deep && targetType is TyClass && myType is TyClass) {
+                return@all myType.isAllMemberFitTo(targetType, context, true)
+            } else {
+                return@all targetType == myType
             }
-        }
-        else{ // Can't find that member, this is an unfit type.
+        } else { // Can't find that member, this is an unfit type.
             return@all false
         }
     }
+}
+
+fun ITy.isIndexableBy(type: ITy,context: SearchContext,strict: Boolean): Boolean {
+    if (type is TyPrimitive && type.primitiveKind == TyPrimitiveKind.String) {
+        if(this is ITyClass)
+            return true
+    }
+    if (type is TyPrimitive && type.primitiveKind == TyPrimitiveKind.Number) {
+        if (this is TyArray
+            || this is TyGeneric
+                && this.base is TyPrimitive
+                && (this.base as TyPrimitive).primitiveKind == TyPrimitiveKind.Table
+                && this.params[0] is TyPrimitive
+                && (this.params[0] as TyPrimitive).primitiveKind == TyPrimitiveKind.Number)
+            return true
+    }else{
+        if(this is TyGeneric
+            && this.base is TyPrimitive
+            && (this.base as TyPrimitive).primitiveKind == TyPrimitiveKind.Table
+            && this.params.size>1
+            && type.subTypeOf(this.params[0],context,strict))
+            return true
+    }
+
+    return false
 }

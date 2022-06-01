@@ -281,11 +281,13 @@
                 displayName="Undeclared variable"
                 enabledByDefault="true"
                 groupName="Lua > Lint > Type safety"
+                level="ERROR"
                 implementationClass="com.tang.intellij.lua.codeInsight.inspection.UndeclaredVariableInspection"/>
         <localInspection
                 displayName="Undeclared member"
                 enabledByDefault="true"
                 groupName="Lua > Lint > Type safety"
+                level="ERROR"
                 implementationClass="com.tang.intellij.lua.codeInsight.inspection.UndeclaredMemberInspection"/>
         <localInspection
                 displayName="Return type"
@@ -294,9 +296,14 @@
                 implementationClass="com.tang.intellij.lua.codeInsight.inspection.ReturnTypeInspection"/>
         <localInspection
                 displayName="Assign type"
-                enabledByDefault="false"
+                enabledByDefault="true"
                 groupName="Lua > Lint > Type safety"
                 implementationClass="com.tang.intellij.lua.codeInsight.inspection.AssignTypeInspection"/>
+        <localInspection
+                displayName="Index expression"
+                enabledByDefault="true"
+                groupName="Lua > Lint > Type safety"
+                implementationClass="com.tang.intellij.lua.codeInsight.inspection.IndexExprInspection"/>
         <localInspection
                 displayName="Global name can be local"
                 enabledByDefault="false"
