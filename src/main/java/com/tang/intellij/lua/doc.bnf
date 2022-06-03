@@ -332,4 +332,6 @@ tag_suppress ::= TAG_NAME_SUPPRESS ID (',' ID)* {
     pin = 1
 }
 
-tag_nilable ::= TAG_NAME_NILABLE
+tag_nilable ::= TAG_NAME_NILABLE{
+    stubClass = "com.tang.intellij.lua.stubs.LuaDocTagNilableStub"
+}

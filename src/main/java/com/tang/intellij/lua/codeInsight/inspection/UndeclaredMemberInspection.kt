@@ -16,7 +16,10 @@
 
 package com.tang.intellij.lua.codeInsight.inspection
 
+import com.intellij.codeInspection.LocalQuickFix
+import com.intellij.codeInspection.ProblemDescriptor
 import com.intellij.codeInspection.ProblemsHolder
+import com.intellij.openapi.project.Project
 import com.intellij.psi.PsiElementVisitor
 import com.intellij.psi.util.PsiTreeUtil
 import com.tang.intellij.lua.psi.*
@@ -72,4 +75,15 @@ class UndeclaredMemberInspection : StrictInspection() {
                 }
             }
         }
+
+    class CreateMemberAutoFix:LocalQuickFix{
+        override fun getFamilyName(): String {
+            return "Create member"
+        }
+
+        override fun applyFix(p: Project, problemDescriptor: ProblemDescriptor) {
+
+        }
+
+    }
 }

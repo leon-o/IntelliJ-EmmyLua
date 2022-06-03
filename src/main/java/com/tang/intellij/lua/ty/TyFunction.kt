@@ -241,6 +241,25 @@ fun ITyFunction.process(processor: Processor<IFunSignature>) {
     process { processor.process(it) }
 }
 
+fun ITyFunction.findPerfectSignature(argTypes:List<ITy>,searchContext: SearchContext):IFunSignature{
+    var sig = this.mainSignature
+    process(Processor {
+        for (idx in argTypes.indices){
+            if(argTypes[idx]==Ty.UNKNOWN || argTypes[idx].isSuitableFor(it.getParamTy(idx),searchContext,true)){
+                if(idx == argTypes.size-1){
+                    sig = it
+                }
+
+                return@Processor false
+            }
+            return@Processor true
+        }
+        true
+    })
+
+    return sig
+}
+
 fun ITyFunction.findPerfectSignature(nArgs: Int): IFunSignature {
     var sgi: IFunSignature? = null
     var perfectN = Int.MAX_VALUE

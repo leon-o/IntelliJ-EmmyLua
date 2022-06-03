@@ -67,10 +67,12 @@ public class LuaElementType extends IElementType {
     public static LuaStubElementType DOC_TABLE_DEF = new LuaDocTableDefType();
     public static LuaStubElementType DOC_TABLE_FIELD_DEF = new LuaDocTableFieldType();
     public static LuaStubElementType DOC_ALIAS = new LuaDocTagAliasType();
+    public static LuaStubElementType DOC_NILABLE = new LuaDocTagNilableStubType();
     public static IStubElementType TABLE = new LuaTableExprType();
     public static IStubElementType TABLE_FIELD = new LuaTableFieldType();
     public static IStubElementType INDEX = new LuaIndexExprType();
     public static IStubElementType NAME_EXPR = new LuaNameExprType();
+
     public static ILazyParseableElementType BLOCK = new LuaBlockElementType();
 
     static class LuaBlockElementType extends IReparseableElementType {

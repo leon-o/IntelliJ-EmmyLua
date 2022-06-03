@@ -16,9 +16,10 @@
 
 package com.tang.intellij.lua.codeInsight.inspection
 
-import com.intellij.codeInspection.LocalInspectionToolSession
-import com.intellij.codeInspection.ProblemsHolder
+import com.intellij.codeInspection.*
+import com.intellij.openapi.project.Project
 import com.intellij.psi.PsiElementVisitor
+import com.tang.intellij.lua.psi.LuaDeclarationTree
 import com.tang.intellij.lua.psi.LuaNameExpr
 import com.tang.intellij.lua.psi.LuaVisitor
 import com.tang.intellij.lua.psi.resolve
@@ -36,4 +37,15 @@ class UndeclaredVariableInspection : StrictInspection() {
                     }
                 }
             }
+
+    class RequireAutoFix: LocalQuickFix {
+        override fun getFamilyName(): String {
+            return "Require"
+        }
+
+        override fun applyFix(proj: Project, problem: ProblemDescriptor) {
+            val varName = problem.psiElement.text
+        }
+
+    }
 }

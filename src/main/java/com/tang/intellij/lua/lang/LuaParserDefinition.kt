@@ -84,7 +84,8 @@ class LuaParserDefinition : ParserDefinition {
                 || type === LuaElementType.CLASS_DEF
                 || type === LuaElementType.CLASS_FIELD_DEF
                 || type === LuaElementType.TYPE_DEF
-                || type === LuaElementType.DOC_ALIAS) {
+                || type === LuaElementType.DOC_ALIAS
+                || type === LuaElementType.DOC_NILABLE) {
             LuaDocTypes.Factory.createElement(node)
         } else LuaTypes.Factory.createElement(node)
     }
@@ -215,6 +216,7 @@ fun createDocType(string: String): IElementType {
         "TABLE_DEF" -> LuaElementType.DOC_TABLE_DEF
         "TABLE_FIELD" -> LuaElementType.DOC_TABLE_FIELD_DEF
         "TAG_ALIAS" -> LuaElementType.DOC_ALIAS
+        "TAG_NILABLE" -> LuaElementType.DOC_NILABLE
         else -> if ("TAG_TYPE" == string) LuaElementType.TYPE_DEF else LuaDocElementType(string)
     }
 

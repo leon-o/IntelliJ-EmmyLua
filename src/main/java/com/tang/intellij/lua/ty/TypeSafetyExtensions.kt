@@ -17,8 +17,6 @@
 package com.tang.intellij.lua.ty
 
 import com.tang.intellij.lua.ext.recursionGuard
-import com.tang.intellij.lua.psi.LuaLiteralKind
-import com.tang.intellij.lua.psi.kind
 import com.tang.intellij.lua.search.SearchContext
 
 fun ITy.hasMember(name: String, context: SearchContext): Boolean {
@@ -39,7 +37,7 @@ fun ITy.hasMember(name: String, context: SearchContext): Boolean {
     return false
 }
 
-fun ITyClass.isAllMemberFitTo(target: ITyClass, context: SearchContext, deep: Boolean = false): Boolean {
+fun ITyClass.isAllMemberMatchTo(target: ITyClass, context: SearchContext, deep: Boolean = false): Boolean {
     val myMemberChain = this.getMemberChain(context)
     val targetMemberChain = target.getMemberChain(context)
     return targetMemberChain.all(true) { _, name, member ->
@@ -51,7 +49,7 @@ fun ITyClass.isAllMemberFitTo(target: ITyClass, context: SearchContext, deep: Bo
         if (myMember != null) {
             val myType = myMember.guessType(context)
             if (deep && targetType is TyClass && myType is TyClass) {
-                return@all myType.isAllMemberFitTo(targetType, context, true)
+                return@all myType.isAllMemberMatchTo(targetType, context, true)
             } else {
                 return@all targetType == myType
             }
@@ -80,6 +78,24 @@ fun ITy.isIndexableBy(type: ITy,context: SearchContext,strict: Boolean): Boolean
             && (this.base as ITyPrimitive).primitiveKind == TyPrimitiveKind.Table
             && this.params.size>1
             && type.subTypeOf(this.params[0],context,strict))
+            return true
+    }
+
+    return false
+}
+
+fun ITy.isSuitableFor(target:ITy,context: SearchContext,strict: Boolean):Boolean{
+    if (target == this)
+        return true
+
+    if (this is ITyPrimitive && target is ITyPrimitive){
+        return this.primitiveKind==target.primitiveKind
+    }
+    if (this.subTypeOf(target,context, strict)){
+        return true
+    }
+    if(this is ITyClass && target is ITyClass){
+        if (this.isAllMemberMatchTo(target,context,strict))
             return true
     }
 

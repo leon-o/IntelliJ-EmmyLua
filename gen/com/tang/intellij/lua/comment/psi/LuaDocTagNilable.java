@@ -4,7 +4,9 @@ package com.tang.intellij.lua.comment.psi;
 import java.util.List;
 import org.jetbrains.annotations.*;
 import com.intellij.psi.PsiElement;
+import com.intellij.psi.StubBasedPsiElement;
+import com.tang.intellij.lua.stubs.LuaDocTagNilableStub;
 
-public interface LuaDocTagNilable extends LuaDocTag {
+public interface LuaDocTagNilable extends LuaDocTag, StubBasedPsiElement<LuaDocTagNilableStub> {
 
 }

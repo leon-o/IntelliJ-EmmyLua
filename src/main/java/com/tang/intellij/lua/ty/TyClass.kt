@@ -34,7 +34,6 @@ import com.tang.intellij.lua.psi.search.LuaShortNamesManager
 import com.tang.intellij.lua.search.SearchContext
 import com.tang.intellij.lua.stubs.readNames
 import com.tang.intellij.lua.stubs.writeNames
-import java.lang.reflect.Member
 
 interface ITyClass : ITy {
     val className: String
@@ -337,7 +336,7 @@ class TyTable(val table: LuaTableExpr) : TyClass(getTableTypeName(table)) {
     override fun subTypeOf(other: ITy, context: SearchContext, strict: Boolean): Boolean {
         // Empty list is a table, but subtype of all lists
         return super.subTypeOf(other, context, strict)
-                || other is ITyClass && this.isAllMemberFitTo(other,context,strict)
+                || other is ITyClass && this.isAllMemberMatchTo(other,context,strict)
                 || (other is TyArray && table.tableFieldList.size == 0)
     }
 
