@@ -83,6 +83,7 @@ class MatchFunctionSignatureInspection : StrictInspection() {
                 private fun annotateCall(call: LuaCallExpr, signature: IFunSignature,concreteTypes:List<ConcreteTypeInfo>, searchContext: SearchContext) {
 
                     var nArgs = 0
+                    val substitutor = call.createSubstitutor(signature, searchContext)
                     signature.processArgs(call) { i, pi ->
                         nArgs = i + 1
                         val typeInfo = concreteTypes.getOrNull(i)
@@ -91,9 +92,10 @@ class MatchFunctionSignatureInspection : StrictInspection() {
                             return@processArgs true
                         }
 
-                        val type = typeInfo.ty
-                        if (!type.isSuitableFor(pi.ty, searchContext, true))
-                            myHolder.registerProblem(typeInfo.param, "Type mismatch. Required: '${pi.ty}' Found: '$type'")
+                        val passInType = typeInfo.ty
+                        val paramRealType = if (substitutor==null) pi.ty else pi.ty.substitute(substitutor)// Support generic argument
+                        if (!passInType.isSuitableFor(paramRealType, searchContext, true))
+                            myHolder.registerProblem(typeInfo.param, "Type mismatch. Required: '${paramRealType}' Found: '$passInType'")
                         true
                     }
                     if (nArgs < call.argList.size && !signature.hasVarargs()) {
