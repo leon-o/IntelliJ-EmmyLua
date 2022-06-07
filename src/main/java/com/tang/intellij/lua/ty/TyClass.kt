@@ -79,7 +79,8 @@ abstract class TyClass(override val className: String,
                        override val varName: String = "",
                        override var superClassName: Array<String>? = null
 ) : Ty(TyKind.Class), ITyClass {
-
+    constructor(className: String,varName: String,superClassName: String?)
+            :this(className, varName, if(superClassName==null) null else arrayOf(superClassName))
     final override var aliasName: String? = null
 
     private var _lazyInitialized: Boolean = false
