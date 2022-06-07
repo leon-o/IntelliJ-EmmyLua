@@ -16,6 +16,7 @@
 
 package com.tang.intellij.lua.ty
 
+import com.intellij.openapi.util.Computable
 import com.tang.intellij.lua.ext.recursionGuard
 import com.tang.intellij.lua.search.SearchContext
 
@@ -38,25 +39,40 @@ fun ITy.hasMember(name: String, context: SearchContext): Boolean {
 }
 
 fun ITyClass.isAllMemberMatchTo(target: ITyClass, context: SearchContext, deep: Boolean = false): Boolean {
+    return isAllMemberMatchToInternal(target,context,deep,HashMap())
+}
+
+private fun ITyClass.isAllMemberMatchToInternal(target: ITyClass, context: SearchContext, deep: Boolean = false,mem:MutableMap<ITy,Boolean>): Boolean {
+    if(mem.containsKey(target))
+        return mem[target]==true
+
+    mem[target] = true
+
     val myMemberChain = this.getMemberChain(context)
     val targetMemberChain = target.getMemberChain(context)
-    return targetMemberChain.all(true) { _, name, member ->
-        val targetType = member.guessType(context)
-        if (targetType == Ty.UNKNOWN)
-            return@all true
+    val result = true == recursionGuard(targetMemberChain, {
+        targetMemberChain.all(true) { _, name, member ->
+            val targetType = member.guessType(context)
+            if (targetType == Ty.UNKNOWN)
+                return@all true
 
-        val myMember = myMemberChain.findMember(name)
-        if (myMember != null) {
-            val myType = myMember.guessType(context)
-            if (deep && targetType is TyClass && myType is TyClass) {
-                return@all myType.isAllMemberMatchTo(targetType, context, true)
-            } else {
-                return@all targetType == myType
+            val myMember = myMemberChain.findMember(name)
+            if (myMember != null) {
+                val myType = myMember.guessType(context)
+                if (deep && targetType is TyClass && myType is TyClass) {
+                    return@all myType.isAllMemberMatchTo(targetType, context, true)
+                } else {
+                    return@all targetType == myType
+                }
+            } else { // Can't find that member, this is an unfit type.
+                return@all false
             }
-        } else { // Can't find that member, this is an unfit type.
-            return@all false
         }
-    }
+    })
+
+    mem[target] = result
+
+    return result
 }
 
 fun ITy.isIndexableBy(type: ITy,context: SearchContext,strict: Boolean): Boolean {
@@ -86,6 +102,9 @@ fun ITy.isIndexableBy(type: ITy,context: SearchContext,strict: Boolean): Boolean
 
 fun ITy.isSuitableFor(target:ITy,context: SearchContext,strict: Boolean):Boolean{
     if (target == this)
+        return true
+
+    if (target is TyUnknown) // any
         return true
 
     if (this is ITyPrimitive && target is ITyPrimitive){
