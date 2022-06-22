@@ -17,6 +17,7 @@
 package com.tang.intellij.lua.ty
 
 import com.intellij.openapi.util.Computable
+import com.jetbrains.rd.util.string.println
 import com.tang.intellij.lua.ext.recursionGuard
 import com.tang.intellij.lua.search.SearchContext
 
@@ -39,6 +40,9 @@ fun ITy.hasMember(name: String, context: SearchContext): Boolean {
 }
 
 fun ITyClass.isAllMemberMatchTo(target: ITyClass, context: SearchContext, deep: Boolean = false): Boolean {
+    if (this == target){
+        return true
+    }
     return isAllMemberMatchToInternal(target,context,deep,HashMap())
 }
 
@@ -60,7 +64,7 @@ private fun ITyClass.isAllMemberMatchToInternal(target: ITyClass, context: Searc
             if (myMember != null) {
                 val myType = myMember.guessType(context)
                 if (deep && targetType is TyClass && myType is TyClass) {
-                    return@all myType.isAllMemberMatchTo(targetType, context, true)
+                    return@all myType.isAllMemberMatchToInternal(targetType, context, true,mem)
                 } else {
                     return@all targetType == myType
                 }
