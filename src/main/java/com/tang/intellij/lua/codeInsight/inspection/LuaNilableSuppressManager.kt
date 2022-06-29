@@ -22,7 +22,7 @@ import com.intellij.psi.PsiElement
 
 class LuaNilableSuppressManager : InspectionSuppressor {
     override fun isSuppressedFor(elelemt: PsiElement, toolId: String): Boolean {
-        println(toolId)
+        //println(toolId)
         return false
     }
 

@@ -114,7 +114,8 @@ fun ITy.isSuitableFor(target:ITy,context: SearchContext,strict: Boolean):Boolean
     if (this is ITyPrimitive && target is ITyPrimitive){
         return this.primitiveKind==target.primitiveKind
     }
-    if (this.subTypeOf(target,context, strict)){
+    val finalStrict = strict&&!(this is ITyFunction && target is ITyFunction)
+    if (this.subTypeOf(target,context, finalStrict)){
         return true
     }
     if(this is ITyClass && target is ITyClass){

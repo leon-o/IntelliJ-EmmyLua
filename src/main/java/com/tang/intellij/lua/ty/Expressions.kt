@@ -49,7 +49,7 @@ private fun inferExprInner(expr: LuaPsiElement, context: SearchContext): ITy {
         is LuaBinaryExpr -> expr.infer(context)
         is LuaCallExpr -> expr.infer(context)
         is LuaClosureExpr -> infer(expr, context)
-        is LuaTableExpr -> expr.infer()
+        is LuaTableExpr -> expr.infer(context)
         is LuaParenExpr -> infer(expr.expr, context)
         is LuaNameExpr -> expr.infer(context)
         is LuaLiteralExpr -> expr.infer()
@@ -395,7 +395,7 @@ private fun guessFieldType(fieldName: String, type: ITyClass, context: SearchCon
     return set
 }
 
-private fun LuaTableExpr.infer(): ITy {
+private fun LuaTableExpr.infer(context: SearchContext): ITy {
     val list = this.tableFieldList
     if (list.size == 1) {
         val valueExpr = list.first().valueExpr
@@ -404,6 +404,37 @@ private fun LuaTableExpr.infer(): ITy {
             val ty = func?.varargType
             if (ty != null)
                 return TyArray(ty)
+        }
+    }else if (list.size>1){
+        val valueExpr = list.first().valueExpr
+        var ty = inferExpr(valueExpr,context)
+        var idTy:ITy? = null
+        var allIdTySame = true
+        var hasNotId = list.first().idExpr==null
+        if (!hasNotId){
+            idTy = inferExpr(list.first().idExpr,context)
+        }
+        for (i in 1 until list.size) {
+
+            hasNotId = hasNotId && list[i].idExpr==null
+            if (list[i].idExpr!=null && allIdTySame){
+                val followingIdTy = inferExpr(list.first().idExpr,context)
+                if(idTy!=null && !followingIdTy.subTypeOf(idTy,context,false)){
+                    allIdTySame = false
+                }
+            }
+
+            val followingType = inferExpr(list[i].valueExpr,context)
+            if (ty.subTypeOf(followingType,context,false)){
+                ty = followingType
+            }else if(ty != followingType){
+                ty = TyUnion.union(ty,followingType)
+            }
+        }
+        if(!hasNotId && allIdTySame && idTy is TyPrimitive && idTy.primitiveKind!=TyPrimitiveKind.String)
+            return TySerializedGeneric(arrayOf(idTy,ty),Ty.TABLE)
+        if (hasNotId){
+            return TyArray(ty)
         }
     }
     return TyTable(this)
